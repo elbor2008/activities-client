@@ -1,16 +1,20 @@
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { Item, Button, Label, Segment } from 'semantic-ui-react';
 import { IActivity } from '../../../app/models/activity';
 
 interface IProps {
   activities: IActivity[];
   handleSelectActivity: (id: string) => void;
-  handleDeleteActivity: (id: string) => void;
+  handleDeleteActivity: (e: MouseEvent<HTMLButtonElement>, id: string) => void;
+  isSubmitting: boolean;
+  target: string;
 }
 const ActivityList: FC<IProps> = ({
   activities,
   handleSelectActivity,
-  handleDeleteActivity
+  handleDeleteActivity,
+  isSubmitting,
+  target
 }) => {
   return (
     <Segment clearing>
@@ -34,7 +38,9 @@ const ActivityList: FC<IProps> = ({
                   floated="right"
                 />
                 <Button
-                  onClick={() => handleDeleteActivity(activity.id)}
+                  name={activity.id}
+                  loading={isSubmitting && target === activity.id}
+                  onClick={e => handleDeleteActivity(e, activity.id)}
                   content="Delete"
                   color="red"
                   floated="right"

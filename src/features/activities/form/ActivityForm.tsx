@@ -8,13 +8,15 @@ interface Iprops {
   selectedActivity: IActivity | null;
   handleCreateActivity: (activity: IActivity) => void;
   handleEditActivity: (activity: IActivity) => void;
+  isSubmitting: boolean;
 }
 
 const ActivityForm: FC<Iprops> = ({
   setEditMode,
   selectedActivity,
   handleCreateActivity,
-  handleEditActivity
+  handleEditActivity,
+  isSubmitting
 }) => {
   const initialActivity = (): IActivity =>
     selectedActivity
@@ -84,7 +86,13 @@ const ActivityForm: FC<Iprops> = ({
           value={activity.venue}
           onChange={handleInputChange}
         />
-        <Button floated="right" type="submit" positive content="Submit" />
+        <Button
+          loading={isSubmitting}
+          floated="right"
+          type="submit"
+          positive
+          content="Submit"
+        />
         <Button
           onClick={() => setEditMode(false)}
           floated="right"

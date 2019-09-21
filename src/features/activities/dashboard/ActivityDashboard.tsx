@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { Grid, Container } from 'semantic-ui-react';
 import { IActivity } from '../../../app/models/activity';
 import ActivityList from './ActivityList';
@@ -14,7 +14,9 @@ interface IProps {
   setSelectedActivity: (activity: IActivity | null) => void;
   handleCreateActivity: (activity: IActivity) => void;
   handleEditActivity: (activity: IActivity) => void;
-  handleDeleteActivity: (id: string) => void;
+  handleDeleteActivity: (e: MouseEvent<HTMLButtonElement>, id: string) => void;
+  isSubmitting: boolean;
+  target: string;
 }
 const ActivityDashboard: FC<IProps> = ({
   activities,
@@ -25,7 +27,9 @@ const ActivityDashboard: FC<IProps> = ({
   setSelectedActivity,
   handleCreateActivity,
   handleEditActivity,
-  handleDeleteActivity
+  handleDeleteActivity,
+  isSubmitting,
+  target
 }) => {
   return (
     <Container style={{ marginTop: '7em' }}>
@@ -35,6 +39,8 @@ const ActivityDashboard: FC<IProps> = ({
             activities={activities}
             handleSelectActivity={handleSelectActivity}
             handleDeleteActivity={handleDeleteActivity}
+            isSubmitting={isSubmitting}
+            target={target}
           />
         </Grid.Column>
         <Grid.Column width={6}>
@@ -51,6 +57,7 @@ const ActivityDashboard: FC<IProps> = ({
               selectedActivity={selectedActivity}
               handleCreateActivity={handleCreateActivity}
               handleEditActivity={handleEditActivity}
+              isSubmitting={isSubmitting}
               key={(selectedActivity && selectedActivity.id) || 0}
             />
           )}

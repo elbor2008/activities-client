@@ -1,8 +1,9 @@
-import React, { useState, useEffect, Fragment } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, Fragment, MouseEvent } from 'react';
 import { IActivity } from '../models/activity';
 import NavBar from '../../features/nav/NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
+import Loading from './Loading';
+import agent from '../api/agent';
 
 const App = () => {
   const [activities, setActivities] = useState<IActivity[]>([]);
@@ -10,6 +11,9 @@ const App = () => {
     null
   );
   const [editMode, setEditMode] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [target, setTarget] = useState('');
   const handleSelectActivity = (id: string) => {
     setSelectedActivity(activities.filter(activity => activity.id === id)[0]);
     setEditMode(false);
@@ -19,27 +23,58 @@ const App = () => {
     setEditMode(true);
   };
   const handleCreateActivity = (activity: IActivity): void => {
-    setActivities([...activities, activity]);
-    setSelectedActivity(activity);
-    setEditMode(false);
+    setSubmitting(true);
+    agent.Activities.create(activity)
+      .then(() => {
+        setActivities([...activities, activity]);
+        setSelectedActivity(activity);
+        setEditMode(false);
+      })
+      .then(() => setSubmitting(false));
   };
   const handleEditActivity = (activity: IActivity): void => {
-    setActivities([...activities.filter(a => a.id !== activity.id), activity]);
-    setSelectedActivity(activity);
-    setEditMode(false);
+    setSubmitting(true);
+    agent.Activities.update(activity)
+      .then(() => {
+        setActivities([
+          ...activities.filter(a => a.id !== activity.id),
+          activity
+        ]);
+        setSelectedActivity(activity);
+        setEditMode(false);
+      })
+      .then(() => setSubmitting(false));
   };
-  const handleDeleteActivity = (id: string): void => {
-    setActivities(activities.filter(activity => activity.id !== id));
+  const handleDeleteActivity = (
+    e: MouseEvent<HTMLButtonElement>,
+    id: string
+  ): void => {
+    const { name } = e.currentTarget;
+    setTarget(name);
+    setSubmitting(true);
+    agent.Activities.delete(id)
+      .then(() => {
+        setActivities(activities.filter(activity => activity.id !== id));
+      })
+      .then(() => setSubmitting(false));
   };
   useEffect((): void => {
-    axios.get<IActivity[]>('http://localhost:5000/api/activities').then(res => {
-      const activities = res.data.map(activity => {
-        activity.date = activity.date.split('.')[0];
-        return activity;
+    setLoading(true);
+    agent.Activities.list()
+      .then(res => {
+        const activities = res.map(activity => {
+          activity.date = activity.date.split('.')[0];
+          return activity;
+        });
+        setActivities(activities);
+      })
+      .then(() => {
+        setLoading(false);
       });
-      setActivities(activities);
-    });
   }, []);
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <Fragment>
       <NavBar handleOpenForm={handleOpenForm} />
@@ -53,6 +88,8 @@ const App = () => {
         handleCreateActivity={handleCreateActivity}
         handleEditActivity={handleEditActivity}
         handleDeleteActivity={handleDeleteActivity}
+        isSubmitting={isSubmitting}
+        target={target}
       />
     </Fragment>
   );
