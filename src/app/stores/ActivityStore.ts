@@ -39,9 +39,32 @@ class ActivityStore {
       });
     }
   };
+  @action loadActivity = async (id: string) => {
+    this.isLoading = true;
+    try {
+      const activity = this.activitiesMap.get(id);
+      if (activity) {
+        this.selectedActivity = activity;
+        this.isLoading = false;
+      } else {
+        const activity = await agent.Activities.details(id);
+        runInAction('loading activity', () => {
+          this.selectedActivity = activity;
+        });
+      }
+    } catch (error) {
+      runInAction('loading activity error', () => {
+        this.isLoading = false;
+        console.log(error);
+      });
+    }
+  };
   @action setActivity = (id: string): void => {
     this.selectedActivity = this.activitiesMap.get(id);
     this.editMode = false;
+  };
+  @action clearActivity = (): void => {
+    this.selectedActivity = undefined;
   };
   @action cancelForm = (): void => {
     this.selectedActivity = undefined;

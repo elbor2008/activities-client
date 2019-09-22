@@ -1,31 +1,49 @@
-import React, { FC, useState, FormEvent, useContext } from 'react';
+import React, { FC, useState, FormEvent, useContext, useEffect } from 'react';
 import { Form, Segment, Button } from 'semantic-ui-react';
 import uuidv4 from 'uuid/v4';
 import { IActivity } from '../../../app/models/activity';
 import { observer } from 'mobx-react-lite';
 import ActivityStore from '../../../app/stores/ActivityStore';
+import { RouteComponentProps } from 'react-router-dom';
 
-const ActivityForm: FC = () => {
+const ActivityForm: FC<RouteComponentProps<{ id: string }>> = ({
+  match,
+  history
+}) => {
   const {
-    selectedActivity,
     setEditMode,
     createActivity,
     isSubmitting,
-    editActivity
+    editActivity,
+    loadActivity,
+    selectedActivity,
+    clearActivity
   } = useContext(ActivityStore);
-  const initialActivity = (): IActivity =>
-    selectedActivity
-      ? { ...selectedActivity }
-      : {
-          id: '',
-          title: '',
-          description: '',
-          category: '',
-          date: '',
-          city: '',
-          venue: ''
-        };
-  const [activity, setActivity] = useState<IActivity>(initialActivity);
+  const [activity, setActivity] = useState<IActivity>({
+    id: '',
+    title: '',
+    description: '',
+    category: '',
+    date: '',
+    city: '',
+    venue: ''
+  });
+  useEffect(() => {
+    if (match.params.id && activity.id.length === 0) {
+      loadActivity(match.params.id).then(() => {
+        selectedActivity && setActivity(selectedActivity);
+      });
+    }
+    return () => {
+      clearActivity();
+    };
+  }, [
+    loadActivity,
+    clearActivity,
+    match.params.id,
+    selectedActivity,
+    activity.id.length
+  ]);
   const handleInputChange = (
     event: FormEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
@@ -35,9 +53,13 @@ const ActivityForm: FC = () => {
   const handleSubmit = (): void => {
     if (!activity.id) {
       activity.id = uuidv4();
-      createActivity(activity);
+      createActivity(activity).then(() => {
+        history.push(`/activities/${activity.id}`);
+      });
     } else {
-      editActivity(activity);
+      editActivity(activity).then(() => {
+        history.push(`/activities/${activity.id}`);
+      });
     }
   };
   return (
