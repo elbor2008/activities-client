@@ -1,23 +1,18 @@
-import React, { FC, useState, FormEvent } from 'react';
+import React, { FC, useState, FormEvent, useContext } from 'react';
 import { Form, Segment, Button } from 'semantic-ui-react';
 import uuidv4 from 'uuid/v4';
 import { IActivity } from '../../../app/models/activity';
+import { observer } from 'mobx-react-lite';
+import ActivityStore from '../../../app/stores/ActivityStore';
 
-interface Iprops {
-  setEditMode: (editMode: boolean) => void;
-  selectedActivity: IActivity | null;
-  handleCreateActivity: (activity: IActivity) => void;
-  handleEditActivity: (activity: IActivity) => void;
-  isSubmitting: boolean;
-}
-
-const ActivityForm: FC<Iprops> = ({
-  setEditMode,
-  selectedActivity,
-  handleCreateActivity,
-  handleEditActivity,
-  isSubmitting
-}) => {
+const ActivityForm: FC = () => {
+  const {
+    selectedActivity,
+    setEditMode,
+    createActivity,
+    isSubmitting,
+    editActivity
+  } = useContext(ActivityStore);
   const initialActivity = (): IActivity =>
     selectedActivity
       ? { ...selectedActivity }
@@ -40,9 +35,9 @@ const ActivityForm: FC<Iprops> = ({
   const handleSubmit = (): void => {
     if (!activity.id) {
       activity.id = uuidv4();
-      handleCreateActivity({ ...activity });
+      createActivity(activity);
     } else {
-      handleEditActivity(activity);
+      editActivity(activity);
     }
   };
   return (
@@ -104,4 +99,4 @@ const ActivityForm: FC<Iprops> = ({
   );
 };
 
-export default ActivityForm;
+export default observer(ActivityForm);

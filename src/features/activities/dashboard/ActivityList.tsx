@@ -1,25 +1,20 @@
-import React, { FC, MouseEvent } from 'react';
+import React, { FC, useContext } from 'react';
 import { Item, Button, Label, Segment } from 'semantic-ui-react';
-import { IActivity } from '../../../app/models/activity';
+import { observer } from 'mobx-react-lite';
+import ActivityStore from '../../../app/stores/ActivityStore';
 
-interface IProps {
-  activities: IActivity[];
-  handleSelectActivity: (id: string) => void;
-  handleDeleteActivity: (e: MouseEvent<HTMLButtonElement>, id: string) => void;
-  isSubmitting: boolean;
-  target: string;
-}
-const ActivityList: FC<IProps> = ({
-  activities,
-  handleSelectActivity,
-  handleDeleteActivity,
-  isSubmitting,
-  target
-}) => {
+const ActivityList: FC = () => {
+  const {
+    activitiesByDate,
+    setActivity,
+    isSubmitting,
+    target,
+    deleteActivity
+  } = useContext(ActivityStore);
   return (
     <Segment clearing>
       <Item.Group divided>
-        {activities.map(activity => (
+        {activitiesByDate.map(activity => (
           <Item key={activity.id}>
             <Item.Content>
               <Item.Header as="a">{activity.title}</Item.Header>
@@ -32,7 +27,7 @@ const ActivityList: FC<IProps> = ({
               </Item.Description>
               <Item.Extra>
                 <Button
-                  onClick={() => handleSelectActivity(activity.id)}
+                  onClick={() => setActivity(activity.id)}
                   content="View"
                   color="blue"
                   floated="right"
@@ -40,7 +35,7 @@ const ActivityList: FC<IProps> = ({
                 <Button
                   name={activity.id}
                   loading={isSubmitting && target === activity.id}
-                  onClick={e => handleDeleteActivity(e, activity.id)}
+                  onClick={e => deleteActivity(e, activity.id)}
                   content="Delete"
                   color="red"
                   floated="right"
@@ -55,4 +50,4 @@ const ActivityList: FC<IProps> = ({
   );
 };
 
-export default ActivityList;
+export default observer(ActivityList);

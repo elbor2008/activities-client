@@ -1,35 +1,30 @@
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import { Card, Image, Button } from 'semantic-ui-react';
-import { IActivity } from '../../../app/models/activity';
+import ActivityStore from '../../../app/stores/ActivityStore';
+import { observer } from 'mobx-react-lite';
 
-interface IProps {
-  selectedActivity: IActivity;
-  setEditMode: (editMode: boolean) => void;
-  setSelectedActivity: (activity: IActivity | null) => void;
-}
-const ActivityDetails: FC<IProps> = ({
-  selectedActivity,
-  setEditMode,
-  setSelectedActivity
-}) => {
+const ActivityDetails: FC = () => {
+  const { selectedActivity, setEditMode, cancelForm } = useContext(
+    ActivityStore
+  );
   return (
     <Card fluid>
       <Image
-        src={`/assets/categoryImages/${selectedActivity.category}.jpg`}
+        src={`/assets/categoryImages/${selectedActivity!.category}.jpg`}
         wrapped
         ui={false}
       />
       <Card.Content>
-        <Card.Header>{selectedActivity.title}</Card.Header>
-        <Card.Meta>{selectedActivity.date}</Card.Meta>
-        <Card.Description>{selectedActivity.description}</Card.Description>
+        <Card.Header>{selectedActivity!.title}</Card.Header>
+        <Card.Meta>{selectedActivity!.date}</Card.Meta>
+        <Card.Description>{selectedActivity!.description}</Card.Description>
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths={2}>
           <Button onClick={() => setEditMode(true)} basic color="blue">
             Edit
           </Button>
-          <Button onClick={() => setSelectedActivity(null)} basic color="grey">
+          <Button onClick={cancelForm} basic color="grey">
             Cancel
           </Button>
         </Button.Group>
@@ -38,4 +33,4 @@ const ActivityDetails: FC<IProps> = ({
   );
 };
 
-export default ActivityDetails;
+export default observer(ActivityDetails);
